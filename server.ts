@@ -7,6 +7,7 @@ import { join } from 'path';
 import { AppServerModule } from './src/main.server';
 import { APP_BASE_HREF } from '@angular/common';
 import { existsSync } from 'fs';
+import { scraper } from './scraper';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -34,6 +35,18 @@ export function app(): express.Express {
     res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] });
   });
 
+  server.get("/scraper", async (req, res) => {
+    try {
+        const { q } = req.query
+        console.log(`[scraperRouter] - query: ${q}`);
+        const answer = await scraper(q as string, 'he')
+        console.log(`[scraperRouter] - answer: ${answer}`);   
+        res.send({answer});
+    } catch (error) {
+        console.log(`[scraperRouter] - error: ${error}`);
+        res.sendStatus(500);
+    }
+});
   return server;
 }
 
